@@ -108,7 +108,7 @@ summary(USGS.flow.data$gage.height.min)
 summary(USGS.flow.data$gage.height.mean)
 
 
-#lyt = line type
+#lty = line type
 
 #
 ggplot(USGS.flow.data) +
@@ -164,7 +164,12 @@ ggplot(USGS.flow.data) +
 Question: under what circumstances would it be beneficial to use each of these graph types (bar plot, histogram, frequency polygon, box-and whisker, violin, scatterplot)?
 
 > Answer: 
-
+Bar plot: Visualize count data for categorical variables. 
+Histogram: Visualize distributions of values for continuous numerical variables
+Frequency polygon: Similar to histograms, but instead of displaying bars,  counts of continuous variables are displayed as lines. This is advantageous if you want to display multiple variables or categories of variables at once.
+Box and whisker: Similar to histograms, but displaying IQR, median, outliers
+Violin: Displays density distributions, somewhat like a hybrid of the box-and-whiskers and the frequency polygon plot.
+Scatterplot: Visualize relationships between continuous numerical variables.
 ## Ending discussion
 
 What did you learn about the USGS discharge dataset today? What separate insights did the different graph types offer?
