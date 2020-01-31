@@ -69,6 +69,10 @@ NTL.nutrient.data.PeterPaul.subset <- select(NTL.nutrient.data.PeterPaul,
                                              lakename, year4, daynum, month, sampledate, depth:po4)
 
 # write a more succinct line of code to subset the nutrient dataset. 
+NTL.nutrient.data.PeterPaul.subset  <- 
+  NTL.nutrient.data.PeterPaul %>%
+  select (-lakeid, -depth_id, -comments)
+
 
 ```
 
@@ -95,6 +99,7 @@ write.csv(NTL.nutrient.data.PeterPaul.gathered, row.names = FALSE,
 
 # Spread nutrient data into separate columns
 NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathered, nutrient, concentration)
+#supply column names, and then the values
 
 # Split components of cells into multiple columns
 # Opposite of 'separate' is 'unite'
