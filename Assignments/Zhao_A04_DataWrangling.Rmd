@@ -52,10 +52,6 @@ str(EPAair.O3.2019)
 str(EPAair.PM25.2018)
 str(EPAair.PM25.2019)
 
-
-
-
-
 ```
 
 
@@ -75,28 +71,45 @@ EPAair.PM25.2019$Date <- as.Date(EPAair.PM25.2019$Date, format = "%m/%d/%Y")
 
 #4
 EPAair.O3.2018.subset <- select(EPAair.O3.2018,
-                                Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE,
+                                Date,
+                                DAILY_AQI_VALUE,
+                                Site.Name,
+                                AQS_PARAMETER_DESC,COUNTY,
+                                SITE_LATITUDE,
                                 SITE_LONGITUDE)
 
-EPAair.O3.2019.subset <- select(EPAair.O3.2019, 
-                                Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE,
+EPAair.O3.2019.subset <- select(EPAair.O3.2019,
+                                Date,
+                                DAILY_AQI_VALUE,
+                                Site.Name,
+                                AQS_PARAMETER_DESC,
+                                COUNTY,
+                                SITE_LATITUDE,
                                 SITE_LONGITUDE)
 
-EPAair.PM25.2018.subset <- select (EPAair.PM25.2018,
-                                   Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE,
-                                   SITE_LONGITUDE)
+EPAair.PM25.2018.subset <- select(EPAair.PM25.2018,
+                                  Date,
+                                  DAILY_AQI_VALUE,
+                                  Site.Name,
+                                  AQS_PARAMETER_DESC,
+                                  COUNTY,
+                                  SITE_LATITUDE,
+                                  SITE_LONGITUDE)
 
-EPAair.PM25.2019.subset <- select (EPAair.PM25.2019,
-                                   Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE,
-                                   SITE_LONGITUDE)
+EPAair.PM25.2019.subset <- select(EPAair.PM25.2019,
+                                  Date,
+                                  DAILY_AQI_VALUE,
+                                  Site.Name,
+                                  AQS_PARAMETER_DESC,
+                                  COUNTY,
+                                  SITE_LATITUDE,
+                                  SITE_LONGITUDE)
 
 #5
-
 EPAair.PM25.2018.subset$AQS_PARAMETER_DESC <- "PM2.5"
 EPAair.PM25.2019.subset$AQS_PARAMETER_DESC <- "PM2.5"
 
 #6
-
 write.csv(EPAair.O3.2018.subset, row.names = FALSE, 
           file ="../Data/Processed/EPAair_O3_NC2018_Processed.csv")
 
@@ -111,8 +124,6 @@ write.csv(EPAair.PM25.2019.subset, row.names = FALSE,
 
 
 ```
-
-
 ## Combine datasets
 7. Combine the four datasets with `rbind`. Make sure your column names are identical prior to running this code. 
 8. Wrangle your new dataset with a pipe function (%>%) so that it fills the following conditions: 
@@ -128,35 +139,43 @@ write.csv(EPAair.PM25.2019.subset, row.names = FALSE,
 
 ```{r}
 #7
-EPAair.O3.PM25 <- rbind(EPAair.O3.2018.subset, EPAair.O3.2019.subset, EPAair.PM25.2018.subset, EPAair.PM25.2019.subset)
-
+EPAair.O3.PM25 <- rbind(EPAair.O3.2018.subset,
+                        EPAair.O3.2019.subset, 
+                        EPAair.PM25.2018.subset,
+                        EPAair.PM25.2019.subset)
 #8
 EPAair.O3.PM25.filter <- EPAair.O3.PM25 %>%
-  filter (Site.Name == "Linville Falls"|Site.Name=="Durham Armory"|Site.Name ==
-            "Leggett"|Site.Name ==
-            "Hattie Avenue"|Site.Name == "Clemmons Middle"|
-            Site.Name == "Mendenhall School"|Site.Name == "Frying Pan
-            Mountain"|Site.Name == "West Johnston
-            Co."|Site.Name == "Garinger High School"|Site.Name == "Castle
-            Hayne"|Site.Name == "Pitt 
-          Agri. Center"|Site.Name == "Bryson City"|Site.Name == "Millbrook School")%>%
+  filter(Site.Name == "Linville Falls"|
+           Site.Name == "Durham Armory"|
+           Site.Name == "Leggett"|
+           Site.Name == "Hattie Avenue"|
+           Site.Name == "Clemmons Middle"|
+           Site.Name == "Mendenhall School"|
+           Site.Name == "Frying Pan Mountain"|
+           Site.Name == "West Johnston Co."|
+           Site.Name == "Garinger High School"|
+           Site.Name == "Castle Hayne"| 
+           Site.Name == "Pitt Agri. Center"|
+           Site.Name == "Bryson City"|
+           Site.Name == "Millbrook School") %>%
   group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>%
-  summarise(daily.meanaqi = mean(DAILY_AQI_VALUE), 
-            daily.meanlat = mean(SITE_LATITUDE), 
+  summarise(daily.meanaqi = mean(DAILY_AQI_VALUE),
+            daily.meanlat = mean(SITE_LATITUDE),
             daily.meanlong = mean(SITE_LONGITUDE)) %>%
   mutate(Month = month(Date)) %>%
   mutate(Year = year(Date))
 
-dim (EPAair.O3.PM25.filter)
+dim(EPAair.O3.PM25.filter)
 
 #9
-EPAair.O3.PM25.filter.spread <- spread(EPAair.O3.PM25.filter, AQS_PARAMETER_DESC, daily.meanaqi)
+EPAair.O3.PM25.filter.spread <- spread(EPAair.O3.PM25.filter, AQS_PARAMETER_DESC,
+                                       daily.meanaqi)
 
 #10
 dim(EPAair.O3.PM25.filter.spread)
 
 #11
-write.csv(EPAair.O3.PM25.filter.spread, row.names = FALSE, 
+write.csv(EPAair.O3.PM25.filter.spread, row.names = FALSE,
           file ="../Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv")
 ```
 
@@ -170,19 +189,16 @@ write.csv(EPAair.O3.PM25.filter.spread, row.names = FALSE,
 #12a
 EPAair.O3.PM25.summary <- EPAair.O3.PM25.filter.spread %>%
   group_by(Site.Name, Month, Year) %>%
-   summarise(Mean.Ozone= mean(Ozone), 
-             Mean.PM2.5= mean(PM2.5))
+  summarise(Mean.Ozone = mean(Ozone),
+            Mean.PM2.5 = mean(PM2.5))
 
 #12b
-
 EPAair.O3.PM25.summary.clean <- EPAair.O3.PM25.summary %>%
   drop_na(Month, Year)
 
 #13
-
-dim (EPAair.O3.PM25.summary.clean)
+dim(EPAair.O3.PM25.summary.clean)
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
-
 > Answer: drop_na allows us to remove entire rows that contain missing values, whereas na.omit only removes the missing values and not the row that they're in.
