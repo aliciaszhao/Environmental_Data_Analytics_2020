@@ -98,7 +98,7 @@ O3plot7 <- ggplot(EPAair, aes(x = Date, y = Ozone)) +
   geom_hline(yintercept = 50, lty = 2) +
   geom_hline(yintercept = 100, lty = 2) +
   geom_point(alpha = 0.5, size = 1.5) +
-  geom_text(x = as.Date("2020-01-01"), y = 45, label = "good", hjust = 1, fontface = "bold") +
+  geom_text(x = as.Date("2020-01-01"), y = 45, label = "good", hjust = 0, fontface = "bold") +
   geom_text(x = as.Date("2020-01-01"), y = 95, label = "moderate", hjust = 1, fontface = "bold") +
   geom_text(x = as.Date("2020-01-01"), y = 120, label = "unhealthy (sensitive groups)", hjust = 1, fontface = "bold") +
   scale_x_date(limits = as.Date(c("2018-01-01", "2019-12-31")), 
@@ -193,19 +193,15 @@ print(NvsP2)
 Nutrientplot <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration, color = nutrient)) +
   geom_boxplot() +
-  labs(y= (expression(paste("Concentration (",mu,"g/L)"))), x="", color="Nutrient", )+
-  scale_color_manual(name="Nutrient", 
-                        labels = c(expression("NH"[3]* "NH"[4]* ""), 
-                                   expression("NO"[2]* "NO"[3]* ""), 
-                                   expression("PO"[4]*""), 
-                                   expression(paste("Total nitrogen (",mu,"g/L")), 
-                                   expression(paste("Total phosporous (",mu,"g/L"))))
-# place your additional edits here
-  scale_y_continuous(expand = c(0, 0)) +
+  labs(y= (expression(paste("Concentration (",mu,"g/L)"))), x="", color="Nutrient")+
+  scale_color_viridis(discrete = TRUE, option = "magma", end = 0.8,
+                      labels = c(expression(NH[4]^{"+"}), expression(NO[3]^{"-"}),
+                                expression(PO[4]^{"3-"}), "TN", "TP")) +
+  theme(legend.position = "right")+
+  scale_y_continuous(expand = c(0, 0))
   #scale_color_brewer(palette = "YlGnBu") +
   #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
   #scale_color_viridis(discrete = TRUE, end = 0.8) +
-  theme(legend.position = "right")
 print(Nutrientplot)
 ```
 
