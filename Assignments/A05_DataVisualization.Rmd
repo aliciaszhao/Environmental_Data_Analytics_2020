@@ -28,11 +28,11 @@ The completed exercise is due on Tuesday, February 11 at 1:00 pm.
 2. Make sure R is reading dates as date format; if not change the format to date.
 
 ```{r}
-#1
+getwd()
 library(tidyverse)
 library(cowplot)
 
-getwd()
+
 PeterPaul.chem.nutrients <- 
   read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 PeterPaul.chem.nutrients.gathered <-
