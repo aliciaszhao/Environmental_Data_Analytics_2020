@@ -152,7 +152,7 @@ nationalparkcolors (package)
 * https://github.com/katiejolly/nationalparkcolors
 
 ```{r, warning = FALSE}
-#install.packages("viridis")
+# install.packages("viridis")
 # install.packages("RColorBrewer")
 # install.packages("colormap")
 library(viridis)
@@ -175,13 +175,12 @@ print(NvsP)
 NvsP2 <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
   geom_point(alpha = 0.7, size = 2.5) +
-  xlab(expression(paste("Total Phospherous (", mu, "g/L)"))) +
-  ylab(expression(paste("Total Nitrogen (", mu, "g/L)"))) +
-  labs(color="Depth (m)", shape="Lake Name") +
+  # note: the labs function allows you to relabel anything specified as an aesthetic in the first line
+  labs(x = expression(TP ~ (mu*g / L)), y = expression(TN ~ (mu*g / L)),
+       color = "Depth (m)", shape = "") + 
   scale_shape_manual(values = c(15, 17)) +
-  #scale_color_distiller(palette = "Blues", direction = 1) + 
-  # use scale_color_brewer for discrete variables
-  scale_color_viridis(option = "cividis", direction = -1) +
+  #scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
+  scale_color_viridis(option = "magma", direction = -1, end = 0.8) +
   theme(legend.position = "right", 
         legend.text = element_text(size = 12), legend.title = element_text(size = 12))
 print(NvsP2)
@@ -193,18 +192,18 @@ print(NvsP2)
 Nutrientplot <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration, color = nutrient)) +
   geom_boxplot() +
-  labs(y= (expression(paste("Concentration (",mu,"g/L)"))), x="", color="Nutrient", )+
-  scale_color_manual(name="Nutrient", 
-                        labels = c(expression("NH"[3]* "NH"[4]* ""), 
-                                   expression("NO"[2]* "NO"[3]* ""), 
-                                   expression("PO"[4]*""), 
-                                   expression(paste("Total nitrogen (",mu,"g/L")), 
-                                   expression(paste("Total phosporous (",mu,"g/L"))))
 # place your additional edits here
+  labs(x = "", y = expression(Concentration ~ (mu*g / L)), color = "Nutrient") +
   scale_y_continuous(expand = c(0, 0)) +
-  #scale_color_brewer(palette = "YlGnBu") +
-  #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
-  #scale_color_viridis(discrete = TRUE, end = 0.8) +
+  # scale_color_brewer(palette = "YlGnBu", values = (n = 9)[4:9],
+  #                    labels = c(expression(NH[4]^{"+"}), expression(NO[3]^{"-"}),
+  #                               expression(PO[4]^{"3-"}), "TN", "TP")) +
+  # scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84"),
+  #                    labels = c(expression(NH[4]^{"+"}), expression(NO[3]^{"-"}),
+  #                               expression(PO[4]^{"3-"}), "TN", "TP")) +
+  scale_color_viridis(discrete = TRUE, option = "magma", end = 0.8,
+                      labels = c(expression(NH[4]^{"+"}), expression(NO[3]^{"-"}),
+                                expression(PO[4]^{"3-"}), "TN", "TP")) +
   theme(legend.position = "right")
 print(Nutrientplot)
 ```
@@ -246,7 +245,13 @@ Neonics <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
 ggplot(Neonics) +
   geom_bar(aes(x = Endpoint))
 
+Neonics$Endpoint <- reorder(Neonics$Endpoint, Neonics$Endpoint, FUN = length)
 
-
+Neonics.plot <- ggplot(Neonics, aes(x = Endpoint)) +
+  geom_bar(fill = "#7fcdbb", color = "black", size = 0.25) +
+  scale_x_discrete(limits = rev(levels(Neonics$Endpoint))) +
+  labs(y = "Number of Publications with reported endpoint") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(Neonics.plot)
 
 ```

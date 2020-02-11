@@ -189,7 +189,13 @@ print(NvsP)
 # Make the points 50 % transparent
 # Add a line of best fit for the linear regression of these variables.
 
-  
+OzonevPM2.5 <-
+  ggplot(EPAair, aes(x = Ozone, y = PM2.5 , color = daily.meanlat), transparency=0.5) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(OzonevPM2.5)  
+
+
 ```
 
 ### Plotting continuous vs. categorical variables
@@ -214,7 +220,7 @@ print(Nutrientplot4)
 # Violin plot
 Nutrientplot5 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration)) +
-  geom_violin(aes(color = nutrient)) #
+  geom_violin(aes(color= nutrient)) #
 print(Nutrientplot5)
 
 # Frequency polygons
