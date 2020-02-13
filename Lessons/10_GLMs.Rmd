@@ -64,9 +64,13 @@ Are Ozone levels below the threshold for "good" AQI index (0-50)?
 
 summary(EPAair$Ozone)
 EPAair.subsample <- sample_n(EPAair, 5000)
+#take a random assortment of X samples
 
 # Evaluate assumption of normal distribution
 shapiro.test((EPAair.subsample$Ozone))
+
+# small p value = NOT normal. null is that distribution is normal. 
+
 ggplot(EPAair, aes(x = Ozone)) +
   geom_histogram() 
 qqnorm(EPAair$Ozone); qqline(EPAair$Ozone)
@@ -80,11 +84,16 @@ Ozone.plot <- ggplot(EPAair, aes(x = Ozone)) +
   geom_vline(xintercept = 50, color = "#238b45", lty = 2, size = 0.9) +
   scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
 print(Ozone.plot)
+
+# using density plot to compare against EPA standard
+
 ```
 
 Write a sentence or two about the results of this test. Include both the results of the test and an interpretation that puts the findings in context of the resarch question.
 
-> 
+> In conducting the t test, we were interested in finding out whether or not air quality were below the safety threshold (50). The t test returned a a t value of -57.98, a p value of 2.2e-16, which allows us to reject the null hypothesis that air quality is equal to 50, and highly suggests that air quality is less than 50.
+
+> EPA ozone measurements for 2018-2019 were significantly lower than 50, the AQI threshold for good air quality (t-test; t = -57.98, p< .00001)
 
 ### Two-sample t-test
 The two-sample *t* test is used to test the hypothesis that the mean of two samples is equivalent. Unlike the one-sample tests, a two-sample test requires a second assumption that the variance of the two groups is equivalent. Are Ozone levels different between 2018 and 2019?
@@ -93,12 +102,15 @@ The two-sample *t* test is used to test the hypothesis that the mean of two samp
 shapiro.test(EPAair$Ozone[EPAair$Year == 2018])
 shapiro.test(EPAair$Ozone[EPAair$Year == 2019])
 var.test(EPAair$Ozone ~ EPAair$Year)
+#variance test of Ozone by year
 
 ggplot(EPAair, aes(x = Ozone, color = as.factor(Year))) +
   geom_freqpoly()
 
 # Format as a t-test
 O3.twosample <- t.test(EPAair$Ozone ~ EPAair$Year)
+# testing that means are different 
+
 O3.twosample
 O3.twosample$p.value
 
@@ -106,7 +118,10 @@ O3.twosample$p.value
 O3.twosample2 <- lm(EPAair$Ozone ~ EPAair$Year)
 summary(O3.twosample2)
 
+# For linear model, need to call it by using summar() instead of the object itself
+
 plot(O3.twosample2)
+par(mfrow = c(2,2))
 ```
 
 ### Non-parametric equivalent of t-test: Wilcoxon test
@@ -129,6 +144,24 @@ Create three plots, each with appropriately formatted axes and legends. Choose a
 3. geom_violin of ozone divided by year, with the 0.5 quantile marked as a horizontal line. Add letters representing a significant difference between 2018 and 2019. 
 
 ```{r}
+#1 
+Ozone.density <- ggplot(EPAair, aes(x = Ozone)) +
+  #geom_density(stat = "count", fill = "gray") +
+  geom_density(aes(fill = as.factor(Year)), alpha=.5 )+
+  geom_vline(xintercept = 50, color = "black", lty = 2, size = 0.9) +
+  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) + 
+  labs ( y = "Density", fill ="")
+print(Ozone.density)
+
+#2
+Ozone.boxplot <- ggplot (EPAair) + 
+  geom_boxplot (aes(x = as.factor(Year), y = Ozone)) +
+  labs (x = "Year") + 
+  geom_text(x = as.factor(2018), y = 45, label = "good", hjust = 1, fontface = "bold") +
+  geom_text(x = as.factor(2019), y = 95, label = "moderate", hjust = 1, fontface = "bold") 
+
+print (Ozone.boxplot)
+
 
 
 ```
