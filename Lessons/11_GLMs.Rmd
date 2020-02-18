@@ -40,6 +40,8 @@ Litter.Totals <- Litter %>%
   group_by(plotID, collectDate, nlcdClass) %>%
   summarise(dryMass = sum(dryMass))
 
+#For a given day at a given spot, have total amount of litter that was collected
+
 # Test for normality. 
 # Note: the important assumption for GLMs is normality of residuals, 
 # not necessarily normality of raw data. See below when we plot the model.
@@ -66,9 +68,13 @@ bartlett.test(Litter.Totals$dryMass ~ Litter.Totals$plotID)
 Litter.Totals.anova <- aov(data = Litter.Totals, dryMass ~ plotID)
 summary(Litter.Totals.anova)
 
+#plot ID is significant predcotr of dry mass. 
+
 # Format ANOVA as lm
 Litter.Totals.anova2 <- lm(data = Litter.Totals, dryMass ~ plotID)
 summary(Litter.Totals.anova2)
+
+#shows estimate for mean for each individual group. 
 
 # Checking model fit and assumptions
 # ANOVA is robust against departures from normality.
@@ -95,7 +101,7 @@ print(Litter.Totals.plot)
 
 What information does the output give us? How might we report this information in a report?
 
-> 
+> Total litter biomass differed significantly among sites at the Niwot Ridge LTER (Figure 1: ANOVA, F11, 198=4.813, p <0.0001).
 
 
 ### Non-parametric equivalent of ANOVA: Kruskal-Wallis Test
@@ -123,6 +129,8 @@ A two-way ANOVA allows us to examine the effects of two categorical explanatory 
 # Format as aov
 Litter.anova.2way <- aov(data = Litter, dryMass ~ functionalGroup + nlcdClass)
 summary(Litter.anova.2way)
+
+#both functional and nlcd class are predictors of drymass. 
 
 # Format as lm
 Litter.anova.2way2 <- lm(data = Litter, dryMass ~ functionalGroup + nlcdClass)
@@ -163,8 +171,18 @@ Litter.groups
 # Plot the results
 # Edit this graph to make it more visually appealing.
 # Add letters to represent statistical groupings.
+library(viridis)
+
 Litter.anova.plot <- ggplot(Litter, aes(y = dryMass, x = nlcdClass, color = functionalGroup)) +
-  geom_boxplot()
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
+               label = c("d", "d", "d", "a", "d", "d","d", "d",
+                         "d", "d", "d", "b", "d","d","d", "d",
+                         "d", "d", "cd", "bc", "d", "d", "d", "d"), position=position_dodge2(.8)) + 
+  scale_color_viridis(discrete = TRUE, option = "magma", end = 0.8) + 
+  labs(x = "NLCD Class", y = "Dry Mass (g)", color = "Functional Group")
+
 print(Litter.anova.plot)
 
 ```

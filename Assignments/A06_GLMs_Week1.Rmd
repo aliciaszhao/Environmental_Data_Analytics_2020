@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: GLMs week 1 (t-test and ANOVA)"
-author: "Student Name"
+author: "Alicia Zhao"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -29,9 +29,19 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 ```{r, message = FALSE}
 #1
-
+getwd()
+library(tidyverse)
+library(cowplot)
+library(agricolae)
 
 #2
+PeterPaul.chem.nutrients <- 
+  read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+
+PeterPaul.chem.nutrients$sampledate <- as.Date(
+  PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
+
+head(PeterPaul.chem.nutrients$sampledate)
 
 ```
 
@@ -41,6 +51,11 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 3. Wrangle your dataset so that it contains only surface depths and only the years 1993-1996, inclusive. Set month as a factor.
 ```{r}
 
+PeterPaul.surface <- PeterPaul.chem.nutrients %>%
+  filter(depth == 0 & year4 %in% c(1993, 1994, 1995, 1996))
+ 
+PeterPaul.surface$month = as.factor(PeterPaul.surface$month)
+class(PeterPaul.surface$month)
 
 ```
 
@@ -50,7 +65,7 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 4. Which application of the GLM will you use (t-test, one-way ANOVA, two-way ANOVA with main effects, or two-way ANOVA with interaction effects)? Justify your choice.
 
-> Answer: 
+> Answer: To test if nutrients are significantly different between Peter Lake and Paul Lake and across seasons, I would use a two-way ANOVA, as I would be testing a continuous response variable (TP, TN) against two categorical explanatory variables (month, lake).
 
 5. Run your test for TN. Include examination of groupings and consider interaction effects, if relevant.
 
@@ -58,10 +73,34 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 ```{r}
 #5
+TN.anova.2way <- aov(data = PeterPaul.surface, tn_ug ~ lakename + month)
+summary (TN.anova.2way)
+TukeyHSD(TN.anova.2way)
+
+TN.anova.2way.int <- aov(data = PeterPaul.surface, tn_ug ~ lakename * month)
+summary (TN.anova.2way.int)
+#Interaction is not significant, so sticking with the 2-way without interaction effect.
+
+TN.2way <- with(PeterPaul.surface, lakename)
+TN.anova.2way.int.2 <- aov(data = PeterPaul.surface, tn_ug ~ TN.2way)
+TN.groups <- HSD.test(TN.anova.2way.int.2, "TN.2way", group = TRUE)
+TN.groups
 
 
 #6
+TP.anova.2way <- aov(data = PeterPaul.surface, tp_ug ~ lakename + month)
+summary (TP.anova.2way)
+TukeyHSD(TP.anova.2way)
 
+TP.anova.2way.int <- aov(data = PeterPaul.surface, tp_ug ~ lakename * month)
+summary (TP.anova.2way.int)
+# Interaction effect is significant!
+TukeyHSD(TP.anova.2way.int)
+
+TP.interaction <- with(PeterPaul.surface, interaction(lakename, month))
+TP.anova.2way.int.2 <- aov(data = PeterPaul.surface, tp_ug ~ TP.interaction)
+TP.groups <- HSD.test(TP.anova.2way.int.2, "TP.interaction", group = TRUE)
+TP.groups
 
 ```
 
@@ -71,9 +110,41 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 ```{r}
 #7
+TN.anova.plot <- ggplot(subset(PeterPaul.surface,month %in% c("5", "6","7","8","9") ),
+                        aes(y = tn_ug, x = month, color = lakename)) +
+  geom_boxplot() + 
+  scale_color_manual(values = c("dark green", "dark blue")) +
+  labs(x = "Month", y = expression(paste("Total nitrogen (", mu,"g)")), color = " ") + 
+  scale_x_discrete(labels = c("May", "June", "July", "August", "September")) +
+  stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
+               label = c("a", "b", 
+                         "a", "b", 
+                         "a","b",
+                         "a", "b",
+                         "a", "b"), position=position_dodge2(.8))
+
+print(TN.anova.plot)
+
+
+TP.anova.plot <- ggplot(subset(PeterPaul.surface,month %in% c("5", "6","7","8","9")),
+                        aes(y = tp_ug, x = month, color = lakename)) +
+  geom_boxplot() + 
+  scale_color_manual(values = c("dark green", "dark blue")) +
+  labs(x = "Month", y = expression(paste("Total phosphorus (", mu,"g)")), color
+       = " ") + 
+  scale_x_discrete(labels = c("May", "June", "July", "August", "September")) + 
+  stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
+               label = c("cd", "bcd", "d", "ab", "d",
+                         "a", "d", "abc", "cd", "abcd"), position=position_dodge2(.8))
+
+print(TP.anova.plot)
 
 
 #8
+plot_grid(
+  TN.anova.plot + theme (legend.position = "top") + labs(x=""),
+  TP.anova.plot + theme (legend.position = "none"), 
+  nrow = 2, align = 'v')
 
 ```
 
