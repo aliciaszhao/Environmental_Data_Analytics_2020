@@ -18,6 +18,7 @@ editor_options:
 getwd()
 library(tidyverse)
 options(scipen = 4)
+## display 4 digits
 
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 
@@ -56,7 +57,10 @@ cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$dept
 ```
 Question: How would you report the results of this test (overall findings and report of statistical output)?
 
->  
+>  At greater depths, irradiance decreases. 
+> Depth accoutns for approximately 31% of variance in lake irradiance. 
+> Irradiance decreases significantly with decreasing depth (linear regression, R2=0.31, df=15,449, p<0.0001)
+> For every 1m increase in dpeht, irradiance decrease by 95 units.  
 
 So, we see there is a significant negative correlation between irradiance and depth (lower light levels at greater depths), and that this model explains about 31 % of the total variance in irradiance. Let's visualize this relationship and the model itself. 
 
@@ -82,7 +86,7 @@ The option best suited for communicating findings is to plot the explanatory and
 # Plot the regression
 irradiancebydepth <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-  #ylim(0, 2000) +
+  ylim(0, 2000) +
   geom_point() 
 print(irradiancebydepth) 
 ```
@@ -107,11 +111,14 @@ irradiancebydepth2 <-
   geom_point() 
 print(irradiancebydepth2) 
 
+#using scale_y_log10() allows for the values to be unlogged, which are easier to interpret
+
 # SE can also be removed
 irradiancebydepth2 <- 
     ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-    geom_point() +
+    geom_point(pch = 1, alpha = 0.5, color  = "dodgerblue") +
     scale_y_log10() +
+    labs (x = "Depth (m)", y = "Irradiance ()") +
     geom_smooth(method = 'lm', se = FALSE, color = "black")
 print(irradiancebydepth2)
 
@@ -136,13 +143,14 @@ TPregression <- lm(data = subset(PeterPaul.chem.nutrients, lakename == "Paul Lak
 summary(TPregression)
 
 TPplot <- ggplot(subset(PeterPaul.chem.nutrients, lakename == "Paul Lake"), 
-                 aes(x = dissolvedOxygen, y = tp_ug, color = depth)) +
+                 aes(color = dissolvedOxygen, y = tp_ug, x = depth)) +
   geom_point() +
   xlim(0, 20)
 print(TPplot)
 
 par(mfrow = c(2,2), mar=c(1,1,1,1))
 plot(TPregression)
+
 par(mfrow = c(1,1))
 
 ```
@@ -180,3 +188,5 @@ TPmodel <- lm(data = Paul.naomit, tp_ug ~ dissolvedOxygen + temperature_C + tn_u
 summary(TPmodel)
 
 ```
+
+> Results: A model that includes dissolvedo oxygen, temperature, and total nitrogen explains 26% of TP (linear regression, Adjusted R2 = 2.5,df = 109, p < .0001). TP is significantly affected by dissolved oxygen and temperature.  For every 1 unit increase in dissolved oxygen, TP decreases by 0.83 units. For every 1 unit increase in temperature, TP decreases by .48 units. 
