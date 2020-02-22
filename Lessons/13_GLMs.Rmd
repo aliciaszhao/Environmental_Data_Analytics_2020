@@ -19,9 +19,9 @@ getwd()
 library(tidyverse)
 library(lubridate)
 library(viridis)
-#install.packages("nlme")
+# install.packages("nlme")
 library(nlme)
-#install.packages("piecewiseSEM")
+# install.packages("piecewiseSEM")
 library(piecewiseSEM)
 
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
@@ -46,6 +46,9 @@ Let's say we wanted to predict total nitrogen concentrations by depth and by lak
 TNancova.main <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename + depth)
 summary(TNancova.main)
 
+#Supposes that lake may have diff intercept but follow same slope. 
+# PEter Lake will be 284 PLUS 66. 
+
 # interaction effects
 TNancova.interaction <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename * depth)
 summary(TNancova.interaction)
@@ -53,6 +56,8 @@ summary(TNancova.interaction)
 TNplot <- ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = tn_ug, color = lakename)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE) +
+  labs (x = "Depth (m)", y = expression (TN ~ (mu*g/L)), color = "") + 
+  scale_color_manual (values = c("darkblue", "lightblue")) +
   xlim(0, 10)
 print(TNplot)
 
@@ -105,6 +110,9 @@ TempTest.mixed <- lme(data = NTL.summertemp,
 summary(TempTest.mixed)
 rsquared(TempTest.mixed)
 
+# Marginal R2 is fixed effects, Conditional is adding in random effects
+
+
 # Compare the random effects model with the fixed effects model
 TempTest.fixed <- gls(data = NTL.summertemp,
                       temperature_C ~ year4)
@@ -113,6 +121,8 @@ summary(TempTest.fixed)
 anova(TempTest.mixed, TempTest.fixed)
 # The lower the AIC, the better.
 # The p-value tells us whether those models have a significantly different fit
+
+#significant predictor may not be environmentally relevant 
 
 NTL.tempmodel <-
 ggplot(NTL.summertemp, aes(x = year4, y = temperature_C, color = lakename)) +
@@ -127,4 +137,4 @@ print(NTL.tempmodel)
 
 Question: How would you interpret the collective results of your mixed effects model in the context of the study question?
 
-> ANSWER: 
+> ANSWER: Accounting for the effects of lakes, temperature increases with year in northern Wisconsin (ANCOVA)
