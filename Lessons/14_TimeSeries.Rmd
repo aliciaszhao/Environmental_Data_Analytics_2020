@@ -189,15 +189,15 @@ In general, detecting a monotonic trend requires a long sequence of data with fe
 
 Adjusting the data may be necessary to fulfill the assumptions of a trend test. These adjustments include **aggregation**, **subsampling**, and **interpolation**. What do each of these mean, and why might we want to use them?
 
-> aggregation: 
+> aggregation: taking multiple data points to create one data point. Good for getting around data gaps. 
 
-> subsampling: 
+> subsampling: Taking one point for each month to represent data.
 
-> interpolation: 
+> interpolation: fill in gaps between points 
 
 Common interpolation methods: 
 
-* **Piecewise constant**: also known as a "nearest neighbor" approach. Any missing data are assumed to be equal to the measurement made nearest to that date (could be earlier or later).
+* **Piecewise constant**: also known as a "nearest neighbor" approach. Any missing data are assumed to be equal to the measurement made nearest to that date (could be earlier or later). Looks like a step function. 
 * **Linear**: could be thought of as a "connect the dots" approach. Any missing data are assumed to fall between the previous and next measurement, with a straight line drawn between the known points determining the values of the interpolated data on any given date.
 * **Spline**: similar to a linear interpolation except that a quadratic function is used to interpolate rather than drawing a straight line.
 
@@ -282,6 +282,7 @@ EnoDischarge.late.trend <- smk.test(EnoDischarge.late.monthly.ts)
 
 # Inspect results
 EnoDischarge.late.trend
+# general output of test. Null hyp is that therei s no monotonic trend over time. High p value means that there is no trend over time.  Slightly decreasing trend but not significant. 
 summary(EnoDischarge.late.trend)
 
 EnoDischarge.monthly <-
@@ -293,10 +294,9 @@ print(EnoDischarge.monthly)
 
 What would we conclude based on these findings? 
 
->
+> Discharge from 1985-2019 does not appear to display a significant trend across any individual months beyond the seasonal trends (seasonal Mann-Kendall, z= -0.14, p = 0.889). 
  
 If a significant trend was present, we could compute a **Sen's Slope** to quantify that trend (`sens.slope` function in the trend package).
-
 
 
 ## Forecasting with Autoregressive and Moving Average Models (ARMA)
