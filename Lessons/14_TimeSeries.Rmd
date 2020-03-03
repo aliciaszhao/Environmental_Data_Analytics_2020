@@ -79,7 +79,7 @@ Let's start by removing the NAs and splitting the dataset into the early and lat
 EnoDischarge.complete <- EnoDischarge %>%
   drop_na(discharge.mean)
 
-# Use drop_na when we want to exclude form one column. 
+# Use drop_na when we want to exclude from one column. 
 
 EnoDischarge.early <- EnoDischarge.complete %>%
   filter(datetime < as.Date("1985-01-01"))
@@ -105,6 +105,9 @@ Note: time series objects must be equispaced. In our case, we have daily data wi
 
 ```{r}
 EnoDischarge.late_ts <- ts(EnoDischarge.late[[8]], frequency = 365)
+
+
+EnoDischarge.late_ts2 <- ts(EnoDischarge.late$discharge.mean, frequency = 365)
 ```
 
 The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
@@ -112,7 +115,7 @@ The `stl` function decomposes the time series object into its component parts. W
 ```{r}
 ?stl
 # Generate the decomposition
-EnoDischarge.late_Decomposed <- stl(EnoDischarge.late_ts, s.window = "periodic")
+EnoDischarge.late_Decomposed <- stl(EnoDischarge.late_ts2, s.window = "periodic")
 
 # Visualize the decomposed series. 
 plot(EnoDischarge.late_Decomposed)
@@ -268,6 +271,7 @@ EnoDischarge.late.monthly <- EnoDischarge.late %>%
          Month = month(datetime)) %>%
   group_by(Year, Month) %>%
   summarise(Discharge = mean(discharge.mean)) 
+
   
 EnoDischarge.late.monthly$Date <- as.Date(paste(EnoDischarge.late.monthly$Year, 
                                                 EnoDischarge.late.monthly$Month, 
