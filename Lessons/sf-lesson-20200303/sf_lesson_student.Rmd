@@ -253,6 +253,7 @@ National Center for Ecological Analysis and Synthesis created a CRS summary shee
 The data we'll use in this lesson comes from the United States Geologic Survey (USGS). Specifically, the dataset is called the Geospatial Attributes of Gages for Evaluating Steamflow, version 2 (GAGES-II) available [here](https://water.usgs.gov/GIS/metadata/usgswrd/XML/gagesII_Sept2011.xml). GAGES-II provides geospatial data and classifications of 9,322 stream gages that are maintained by the USGS. It includes: (1) watershed boundaries by region (spatial data), (2) USGS stream gage locations (spatial data), (3) watershed characteristics (tabular data). Note that the term "watershed" is used interchangeably with the word "basin".
 
 We'll also being using Southeast state boundary data from the United States Census Bureau.
+**Maps package good for state boundaries and other open source data.
 
 Here is what the spatial data for this lesson looks like (Figure 4). Southeast state boundaries are shown in dark green, watershed boundaries are shown in light green, and stream gage locations are shown as grey points.
 
@@ -279,9 +280,9 @@ I like to always save a copy of the raw data in my R session and rename all new 
 
 ```{r activity.load.data}
 # add your code here
-gages_raw <- 
-southeast_state_bounds_raw <- 
-my_tabular_data_raw <- 
+gages_raw <- st_read(here("data", "spatial_data", "gagesII_9322_sept30_2011.shp"))
+southeast_state_bounds_raw <- st_read(here("data", "spatial_data", "southeast_state_bounds.shp"))
+my_tabular_data_raw <- read.csv(here("data", "tabular_data", "gagesII_sept30_2011_tabular.csv"))
 
 # red warning text is telling you how the data is being parsed
 ```
@@ -304,6 +305,11 @@ Use base R commands to answer the following questions (for basins_nf_seplains_ra
 ```{r activity.check.out.data}
 
 # add your code here
+class(basins_nf_seplains_raw)
+colnames(basins_nf_seplains_raw)
+dim(basins_nf_seplains_raw)
+attributes(basins_nf_seplains_raw)
+head(basins_nf_seplains_raw)
 
 # bonus, add your code here
 ```
@@ -325,6 +331,9 @@ Use st_crs() to look at the CRSs of the spatial data you have loaded up so far. 
 
 ```{r activity.check.out.data.again}
 # add your code here
+st_crs(basins_nf_seplains_raw)
+st_crs(gages_raw)
+st_crs(southeast_state_bounds_raw)
 
 # first two will not have EPSG code but have proj4 string (i.e., "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
 
@@ -371,23 +380,32 @@ Last, check the CRSs of each.
 ```{r activity.setting.projecting}
 # define proj4 string and EPSG code
 # add your code here
-my_proj4 <- 
-my_epsg <- 
+my_proj4 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+my_epsg <- 5070
+
 
 # setting projections
 # set the proj4 string first and then set the EPSG code (because proj4 will over-ride EPSG if you set EPSG first)
 # add your code here
 # basins
 basins_nf_seplains <- basins_nf_seplains_raw
+st_crs(basins_nf_seplains) <- my_epsg
+st_transform(x = basins_nf_seplains, crs = my_proj4)
+
+
 
 # add your code here
 # gages
 gages <- gages_raw
+st_crs(gages) <- my_proj4
+
 
 # state bounds
 # this one looks good so you don't need to do anything but here's the code anyway
 # add your code here
 southeast_state_bounds <- southeast_state_bounds_raw
+st_crs(southeast_state_bounds) <- my_proj4
+st_crs(southeast_state_bounds) <- my_epsg
 
 # projecting to North America Albers Equal Area Conic
 # add your code here
@@ -527,21 +545,30 @@ Bonus: What are some other spatial operations (or confirmations) that you could 
 ```{r activity.gages.select}
 # select a state, here I'm choosing North Carolina (NC)
 # add your code here
-
-# check
-# add your code here
+Virginia_bounds <- southeast_state_bounds %>%
+  filter(NAME == "Virginia") %>%
+  st_geometry()
 
 # select watersheds that intersect with NC bounds
 # add your code here
+va_basins_nf_seplains <- basins_nf_seplains %>%
+  st_intersection(Virginia_bounds)
 
 # check
+head(va_basins_nf_seplains)
 # add your code here
 
 # select gages that fall within NC bounds
 # add your code here
+va.gage <- gages %>%
+  st_intersection(Virginia_bounds)
 
 # bonus
 # add your code here
+va_area <- st_area(Virginia_bounds)
+va_centroid <- st_centroid(Virginia_bounds)
+va_gages_buffer_100m <- st_buffer(va.gage, dist = 100)
+not_va_gages <- st_difference(gages, Virginia_bounds)
 ```
 
 It's really helpful to actually plot these results before moving forward with your work. That way you an make sure the sf commands are doing what you expect. We'll talk about plotting next...
@@ -577,6 +604,12 @@ ggplot(data = southeast_state_bounds) +
   geom_sf_text(aes(label = NAME), color = "white") +
   theme_bw()
 dev.off()
+
+pdf(here("outputs", "va_state_bounds.pdf"), width = 11, height = 8.5)
+ggplot() +
+  geom_sf(data = Virginia_bounds) + # you can add color = "blue" to change outline color to blue or lwd = 2 to change the width of the lines
+  theme_bw() # add this to make the background white and not grey
+dev.off()
 ```
 
 **Activity**
@@ -587,6 +620,10 @@ Let's check your operations from the 3.1.2 activity. You are trying for somethin
 # plot NC watershed boundardies from 3.1.2
 pdf(here("outputs", "spatial_operations_test_fig.pdf"), width = 11, height = 8.5)
 # add your code here
+ggplot() +
+      geom_sf(data = Virginia_bounds) +
+      geom_sf(data = va_basins_nf_seplains, fill = "pink", alpha =0.25) +
+      geom_sf (data = va.gage, color = "black")
 dev.off()
 ```
 
