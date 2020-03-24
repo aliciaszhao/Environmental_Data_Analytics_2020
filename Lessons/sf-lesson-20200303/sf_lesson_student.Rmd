@@ -390,7 +390,6 @@ my_epsg <- 5070
 # basins
 basins_nf_seplains <- basins_nf_seplains_raw
 st_crs(basins_nf_seplains) <- my_epsg
-st_transform(x = basins_nf_seplains, crs = my_proj4)
 
 
 
@@ -691,25 +690,45 @@ Can you reproduce Figure 1b?
 ```{r activity.reproducing.figure1b}
 # select NC
 # add your code here
+nc_state_bounds_geom <- southeast_state_bounds %>%
+  filter(NAME == "North Carolina") %>%
+  st_geometry()
 
 # make figure 1b
 # find watersheds that overlap with NC (want the whole watershed, not just the part of the watershe that's inside the NC bounds)
 # add your code here
+nc_basins_nf_seplains <- basins_nf_seplains %>%
+  st_intersection(nc_state_bounds_geom)
+
+nc.gages<- gages %>%
+  st_intersection(nc_state_bounds_geom)
 
 # look at result
 # add your code here
+head(nc_basins_nf_seplains)
+str (nc_basins_nf_seplains)
 
 # make a function to convert binary to logic
 # add your code here
+logic <- function(x){
+  binary <- as.logical(x)
+  return(binary)}
 
 # map function on data and select only true values
 # add your code here
+# If overlap, then return TRUE.
+basins_nf_seplains$Overlap <- basins_nf_seplains %>%
+  st_intersection(nc_state_bounds_geom) %>%
+  logic ()
+
 
 # look at result
 # add your code here
 
 # use nc_basins_overlap_logic to select only watersheds that overlap
 # add your code here
+nc_basins_overlap_logic <- basins_nf_seplains %>%
+  filter()
 
 # check class
 # add your code here
@@ -718,18 +737,38 @@ Can you reproduce Figure 1b?
 # add your code here
 # stretch break...this might take a while to run
 
+southeast.gages <- gages %>%
+  st_intersection(southeast_state_bounds)
+
 # use nc_basins_overlap_sel to find gages inside
 # add your code here
 # stretch break...this might take a while to run
+nc_basins_overlap_sel <- southeast.gages %>%
+  st_intersection(southeast.gages)
+
 
 # convert all to WGS84
-# add your code here
+st_transform(southeast.gages, 4326)
+nc_basins_nf_seplains.wsg84 <- nc_basins_nf_seplains %>%
+  st_transform(4326)
+nc.gages.wsg84 <- nc.gages %>%
+  st_transform(4326)
 
 # plot figure 1b
 # add your code here
 pdf(here("outputs", "figure_1b.pdf"), width = 11, height = 8.5)
+ggmap(nc_basemap)
 # add your code here
 dev.off()
+
+pdf(here("outputs", "figure_1b.pdf"), width = 11, height = 8.5)
+ggmap(nc_basemap) +
+  geom_sf(data = nc_state_bounds_geom_wsg84, fill = NA, lwd = 1, inherit.aes = FALSE) +
+  geom_sf(data = nc_basins_nf_seplains.wsg84, fill = "pink", alpha = 0.25, inherit.aes = FALSE ) +
+  geom_sf(data = nc.gages.wsg84, color = "black", inherit.aes = FALSE)
+dev.off()
+
+
 ```
 
 ### 3.3 Mixing Spatial and Tabular Data
