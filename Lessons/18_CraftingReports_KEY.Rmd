@@ -31,35 +31,24 @@ A handy cheat sheet for R markdown can be found [here](https://www.rstudio.com/w
 
 <Fill in our discussion below with bullet points. Use italics and bold for emphasis (hint: use the cheat sheets to figure out how to make bold and italic text).>
 
-* *italic*
-* **bold**
-* **Documentation**of data pipeline steps
-* Stpre *code*, *visualizations*, and *text* in one place
-* Allows you to see the product of your code when knitted into a pdf
-* Well formatted, looks neat/clean, good to share with others/collaborate
-* You can choose which chunks  of code to run, allows flexibility (managing change/reproducible pipeline)
-* Helps **organize** our code and add notes. 
-
-
 ## TEXT EDITING CHALLENGE
 
 Create a table below that details the example datasets we have been using in class. The first column should contain the names of the datasets and the second column should include some relevant information about the datasets. (Hint: use the cheat sheets to figure out how to make a table in Rmd)
 
-Dataset                   | Information
-------------------------  | ---------------
-EPAair                    | EPA air datasets in NC for PM2.5, O3 2018-2019
-NEON_NIWO_Litter_mass     | Trap data for litter and small woody debris 2016-2019. 
-NTL_LTER                  | Lake nutrients dataset
-                          
+Dataset Name                   | Relevant Dataset Information
+-------------------------------|--------------------------------------
+EPA Air pollutants measurement | Provides measurements in Ozone and PM
+EXOTOX                         | Provides data from studies on several neonicotinoids and their effects on mortality of various organisms
 
 ## R CHUNK EDITING CHALLENGE
 ### Installing packages
 Create an R chunk below that installs the package `knitr`. Instead of commenting out the code, customize the chunk options such that the code is not evaluated (i.e., not run). 
-```{r eval=FALSE, include=FALSE}
+
+```{r, eval=FALSE, include=FALSE}
 install.packages("knitr")
-
+library(knitr)
+# eval - False makes sure the line of code is not run and include = false that it is not displayed in the Knitted document
 ```
-
 
 ### Setup
 Create an R chunk below called "setup" that checks your working directory, loads the packages `tidyverse` and `knitr`, and sets a ggplot theme. Remember that you need to disable R throwing a message, which containts a check mark that cannot be knitted.
@@ -69,22 +58,26 @@ Load the NTL-LTER_Lake_Nutrients_Raw dataset, display the head of the dataset, a
 Customize the chunk options such that the code is run but is not displayed in the final document.
 
 ```{r setup, include=FALSE}
-
-#load packages
+getwd()
 library(tidyverse)
 library(knitr)
+#Building a theme
+NK.theme <- theme_light(base_size = 12) +
+  theme(plot.background = element_rect(fill = "grey97"),
+        panel.grid.major =element_line(linetype = "dotted"),
+        panel.grid.minor = element_line(linetype = "dotted"), text=element_text(size = 14, 
+color = "black", face = "bold"),
+        axis.text = element_text(color = "grey40"), 
+        legend.position = "right",
+        legend.text = element_text(color = "grey40"))
+#setting it as my default theme
+theme_set(NK.theme)
 
-#set theme
-mytheme <- theme_classic() +
-  theme(axis.text = element_text(color = "black"), 
-        legend.position = "top")
-theme_set(mytheme)
-
-NTL.Lake.Nutrients <- read.csv("./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv")
-head(NTL.Lake.Nutrients)
-NTL.Lake.Nutrients$sampledate <- as.Date(NTL.Lake.Nutrients$sampledate, format = "%m/%d/%y")
+Nutrients_data <- read.csv("./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv")
+head(Nutrients_data)
+Nutrients_data$sampledate <- as.Date(Nutrients_data$sampledate,
+format = "%m/%d/%y")
 ```
-
 
 ### Data Exploration, Wrangling, and Visualization
 Create an R chunk below to create a processed dataset do the following operations: 
@@ -92,73 +85,57 @@ Create an R chunk below to create a processed dataset do the following operation
 * Include all columns except lakeid, depth_id, and comments
 * Include only surface samples (depth = 0 m)
 
-```{r}
-NTL.Lake.Nutrients.filtered <- NTL.Lake.Nutrients %>%
-  select(-c(lakeid, depth_id,comments)) %>%
-  filter(depth==0)
-
+```{r, include=FALSE}
+NUtrients_data_processed <- Nutrients_data %>%
+  select(-lakeid,-depth_id,-comments) %>%
+  filter(depth == 0)
 ```
 
 Create a second R chunk to create a summary dataset with the mean, minimum, maximum, and standard deviation of total nitrogen concentrations for each lake. Create a second summary dataset that is identical except that it evaluates total phosphorus. Customize the chunk options such that the code is run but not displayed in the final document. 
 
-```{r summary datasets, include=FALSE}
-
-NTL.Lake.Nitrogen.Summary<- NTL.Lake.Nutrients.filtered%>%
+```{r, include=FALSE}
+Nutrients_summary.tn <- NUtrients_data_processed %>%
   group_by(lakename) %>%
-  na.omit() %>%
-  summarise(Mean.Nitrogen = mean(tn_ug),
-            Min.Nitrogen = min(tn_ug),
-            Max.Nitrogen = max(tn_ug),
-            SD.Nitrogen = sd(tn_ug))
+  summarise(mean.tn_ug = mean(tn_ug, na.rm = TRUE),
+            minimum.tn_ug = min(tn_ug, na.rm = TRUE),
+            maximum.tn_ug = max(tn_ug, na.rm = TRUE),
+            Standard.dev.tn_ug = sd(tn_ug, na.rm = TRUE))
 
-
-NTL.Lake.Phosphorus.Summary<- NTL.Lake.Nutrients.filtered%>%
-  group_by(lakename) %>%
-  na.omit() %>%
-  summarise(Mean.Nitrogen = mean(tp_ug),
-            Min.Nitrogen = min(tp_ug),
-            Max.Nitrogen = max(tp_ug),
-            SD.Nitrogen = sd(tp_ug))
-
+Nutrients_summary.tp <- NUtrients_data_processed %>%
+   group_by(lakename) %>%
+  summarise(mean.tp_ug = mean(tp_ug, na.rm = TRUE),
+            minimum.tp_ug = min(tp_ug, na.rm = TRUE),
+            maximum.tp_ug = max(tp_ug, na.rm = TRUE),
+            Standard.dev.tp_ug = sd(tp_ug, na.rm = TRUE))
 ```
-
 
 Create a third R chunk that uses the function `kable` in the knitr package to display two tables: one for the summary dataframe for total N and one for the summary dataframe of total P. Use the `caption = " "` code within that function to title your tables. Customize the chunk options such that the final table is displayed but not the code used to generate the table. 
 
-```{r echo=FALSE}
-kable(NTL.Lake.Nitrogen.Summary, caption = "Summary of Total Nitrogen")
-
-kable(NTL.Lake.Phosphorus.Summary, caption = "Summary of Total Phosphorus")
-
+```{r, include=FALSE}
+kable(Nutrients_summary.tn, caption = "Total Nitrogen conentrations per Lake")
+kable(Nutrients_summary.tp, caption = "Total Phosporous conentrations per Lake")
 ```
-
 
 Create a fourth and fifth R chunk that generates two plots (one in each chunk): one for total N over time with different colors for each lake, and one with the same setup but for total P. Decide which geom option will be appropriate for your purpose, and select a color palette that is visually pleasing and accessible. Customize the chunk options such that the final figures are displayed but not the code used to generate the figures. In addition, customize the chunk options such that the figures are aligned on the left side of the page. Lastly, add a fig.cap chunk option to add a caption (title) to your plot that will display underneath the figure.
 
-```{r echo=FALSE, fig.height = 4, fig.width = 10}
+```{r, include=FALSE, fig.height = 4, fig.width = 10}
 library(scales)
-
-ggplot(NTL.Lake.Nutrients.filtered, aes(x = as.POSIXct(sampledate),y = tn_ug,color = lakename)) +
+ggplot(NUtrients_data_processed, aes(x = as.POSIXct(sampledate), y = tn_ug, color = lakename)) +
   geom_point() +
-  labs(y = (expression(paste("Total Nitrogen Concentration (",mu,"g/L)"))), x="",
-       color="Lake") +
   scale_color_brewer(palette="Dark2") +
-  scale_x_datetime (date_breaks = "1 year", labels = date_format("%Y"))
-  
-
+  xlab("Date (year)") +
+  ylab("Total Nitrogen (\U003BCg/L)") +
+  scale_x_datetime(date_breaks = "1 year", labels = date_format("%Y"))
 ```
 
-```{r echo=FALSE, fig.align='left'}
-
-ggplot(NTL.Lake.Nutrients.filtered, aes(x = as.POSIXct(sampledate), y = tp_ug, color = lakename)) +
+```{r, include=FALSE, fig.height = 4, fig.width = 10}
+ggplot(NUtrients_data_processed, aes(x = as.POSIXct(sampledate), y = tp_ug, color = lakename)) +
   geom_point() +
   scale_color_brewer(palette="Accent") +
-  labs(y = (expression(paste("Total Phosphorous Concentration (",mu,"g/L)"))), x="",
-       color="Lake") +
-  scale_x_datetime (date_breaks = "1 year", labels = date_format("%Y"))
-
+  xlab("Date (year)") +
+  ylab("Total Nitrogen (\U003BCg/L)") +
+  scale_x_datetime(date_breaks = "1 year", labels = date_format("%Y"))
 ```
-
 
 ### Other options
 What are the chunk options that will suppress the display of errors, warnings, and messages in the final document? 
@@ -167,20 +144,11 @@ What are the chunk options that will suppress the display of errors, warnings, a
 * suppress display of warnings - warnings=FALSE
 * suppress display of messages - messages=FALSE
 
-
 ### Communicating results
 Write a paragraph describing your findings from the R coding challenge above. This should be geared toward an educated audience but one that is not necessarily familiar with the dataset. Then insert a horizontal rule below the paragraph. Below the horizontal rule, write another paragraph describing the next steps you might take in analyzing this dataset. What questions might you be able to answer, and what analyses would you conduct to answer those questions?
 
-*Phosphorous and nitrogen concentrations vary by lake; the difference is especially pronounced in  1997 between East Long Lake, West Long Lake, Peter LAke, versus Paul Lake and Tuesday Lake. East Long Lake consistently has higher concentrations compared to the other lakes over most of the years.*
-
-***
-
-*To better undrstand the relationship, I would want to run a two-way ANOVA looking at year and lake, and run a post-hoc analysis to see which lakes/years are different.*
-
-
 ## KNIT YOUR PDF
-When you have completed the above steps, try knitting your PDF to see if all of the formatting options you specified turned out as planned. This may take some troubleshooting.
-
+When you have completed the above steps, try knitting your PDF to see if all of the formatting options you specified turned out as planned. This may take some troubleshooting. 
 
 ## OTHER R MARKDOWN CUSTOMIZATION OPTIONS
 We have covered the basics in class today, but R Markdown offers many customization options. A word of caution: customizing templates will often require more interaction with LaTeX and installations on your computer, so be ready to troubleshoot issues.

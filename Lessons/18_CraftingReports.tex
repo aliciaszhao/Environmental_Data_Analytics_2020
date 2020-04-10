@@ -260,79 +260,6 @@ dataset, and set the date column to a date format.
 Customize the chunk options such that the code is run but is not
 displayed in the final document.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{knitr}\OperatorTok{::}\NormalTok{opts_chunk}\OperatorTok{$}\KeywordTok{set}\NormalTok{(}\DataTypeTok{include =} \OtherTok{FALSE}\NormalTok{)}
-\KeywordTok{getwd}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] "/Users/mac/Desktop/Spring 2020/Data Analytics/Environmental_Data_Analytics_2020"
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{#load packages}
-\KeywordTok{library}\NormalTok{(tidyverse)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## -- Attaching packages ---------------------------------------------------------- tidyverse 1.3.0 --
-\end{verbatim}
-
-\begin{verbatim}
-## v ggplot2 3.2.1     v purrr   0.3.3
-## v tibble  2.1.3     v dplyr   0.8.3
-## v tidyr   1.0.0     v stringr 1.4.0
-## v readr   1.3.1     v forcats 0.4.0
-\end{verbatim}
-
-\begin{verbatim}
-## -- Conflicts ------------------------------------------------------------- tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(knitr)}
-
-\CommentTok{#set theme}
-\NormalTok{mytheme <-}\StringTok{ }\KeywordTok{theme_classic}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{color =} \StringTok{"black"}\NormalTok{), }
-        \DataTypeTok{legend.position =} \StringTok{"top"}\NormalTok{)}
-\KeywordTok{theme_set}\NormalTok{(mytheme)}
-
-\NormalTok{NTL.Lake.Nutrients <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv"}\NormalTok{)}
-\KeywordTok{head}\NormalTok{(NTL.Lake.Nutrients)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##   lakeid  lakename year4 daynum sampledate depth_id depth tn_ug tp_ug nh34 no23
-## 1      L Paul Lake  1991    140    5/20/91        1  0.00   538    25   NA   NA
-## 2      L Paul Lake  1991    140    5/20/91        2  0.85   285    14   NA   NA
-## 3      L Paul Lake  1991    140    5/20/91        3  1.75   399    14   NA   NA
-## 4      L Paul Lake  1991    140    5/20/91        4  3.00   453    14   NA   NA
-## 5      L Paul Lake  1991    140    5/20/91        5  4.00   363    13   NA   NA
-## 6      L Paul Lake  1991    140    5/20/91        6  6.00   583    37   NA   NA
-##   po4 comments
-## 1  NA         
-## 2  NA         
-## 3  NA         
-## 4  NA         
-## 5  NA         
-## 6  NA
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{NTL.Lake.Nutrients}\OperatorTok{$}\NormalTok{sampledate <-}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(NTL.Lake.Nutrients}\OperatorTok{$}\NormalTok{sampledate, }\DataTypeTok{format =} \StringTok{"%m/%d/%y"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \hypertarget{data-exploration-wrangling-and-visualization}{%
 \subsubsection{Data Exploration, Wrangling, and
 Visualization}\label{data-exploration-wrangling-and-visualization}}
@@ -348,6 +275,14 @@ operations:
   Include only surface samples (depth = 0 m)
 \end{itemize}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{NTL.Lake.Nutrients.filtered <-}\StringTok{ }\NormalTok{NTL.Lake.Nutrients }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\KeywordTok{c}\NormalTok{(lakeid, depth_id,comments)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(depth}\OperatorTok{==}\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
 Create a second R chunk to create a summary dataset with the mean,
 minimum, maximum, and standard deviation of total nitrogen
 concentrations for each lake. Create a second summary dataset that is
@@ -362,6 +297,56 @@ total N and one for the summary dataframe of total P. Use the
 tables. Customize the chunk options such that the final table is
 displayed but not the code used to generate the table.
 
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Summary of Total Nitrogen}\tabularnewline
+\toprule
+lakename & Mean.Nitrogen & Min.Nitrogen & Max.Nitrogen &
+SD.Nitrogen\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+lakename & Mean.Nitrogen & Min.Nitrogen & Max.Nitrogen &
+SD.Nitrogen\tabularnewline
+\midrule
+\endhead
+Central Long Lake & 690.0469 & 343.020 & 953.063 &
+209.09341\tabularnewline
+Crampton Lake & 362.6813 & 353.380 & 376.304 & 12.05748\tabularnewline
+East Long Lake & 810.7834 & 380.620 & 2608.956 &
+335.41457\tabularnewline
+Hummingbird Lake & 1036.6695 & 779.053 & 1221.960 &
+204.36889\tabularnewline
+Paul Lake & 368.7564 & 45.670 & 628.625 & 106.34741\tabularnewline
+Peter Lake & 561.8752 & 219.720 & 2048.151 & 305.64909\tabularnewline
+Tuesday Lake & 423.5605 & 237.363 & 554.418 & 78.84522\tabularnewline
+West Long Lake & 762.6017 & 303.170 & 2870.302 &
+402.95992\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Summary of Total Phosphorus}\tabularnewline
+\toprule
+lakename & Mean.Nitrogen & Min.Nitrogen & Max.Nitrogen &
+SD.Nitrogen\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+lakename & Mean.Nitrogen & Min.Nitrogen & Max.Nitrogen &
+SD.Nitrogen\tabularnewline
+\midrule
+\endhead
+Central Long Lake & 21.70981 & 8.190 & 37.270 & 7.076388\tabularnewline
+Crampton Lake & 11.16033 & 5.803 & 15.555 & 4.946759\tabularnewline
+East Long Lake & 29.28984 & 8.000 & 101.050 & 17.375710\tabularnewline
+Hummingbird Lake & 36.21925 & 32.765 & 42.119 & 4.146717\tabularnewline
+Paul Lake & 10.45606 & 1.222 & 36.070 & 4.805142\tabularnewline
+Peter Lake & 18.39153 & 0.000 & 64.383 & 10.976205\tabularnewline
+Tuesday Lake & 11.71853 & 6.325 & 18.663 & 3.044289\tabularnewline
+West Long Lake & 19.82981 & 2.690 & 63.243 & 10.541276\tabularnewline
+\bottomrule
+\end{longtable}
+
 Create a fourth and fifth R chunk that generates two plots (one in each
 chunk): one for total N over time with different colors for each lake,
 and one with the same setup but for total P. Decide which geom option
@@ -373,6 +358,35 @@ are aligned on the left side of the page. Lastly, add a fig.cap chunk
 option to add a caption (title) to your plot that will display
 underneath the figure.
 
+\begin{verbatim}
+## 
+## Attaching package: 'scales'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:purrr':
+## 
+##     discard
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:readr':
+## 
+##     col_factor
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 139 rows containing missing values (geom_point).
+\end{verbatim}
+
+\includegraphics{18_CraftingReports_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\begin{verbatim}
+## Warning: Removed 7 rows containing missing values (geom_point).
+\end{verbatim}
+
+\begin{flushleft}\includegraphics{18_CraftingReports_files/figure-latex/unnamed-chunk-5-1} \end{flushleft}
+
 \hypertarget{other-options}{%
 \subsubsection{Other options}\label{other-options}}
 
@@ -380,7 +394,8 @@ What are the chunk options that will suppress the display of errors,
 warnings, and messages in the final document?
 
 \begin{quote}
-ANSWER:
+ANSWER: * suppress display of warnings - warnings=FALSE * suppress
+display of messages - messages=FALSE
 \end{quote}
 
 \hypertarget{communicating-results}{%
@@ -393,6 +408,18 @@ below the paragraph. Below the horizontal rule, write another paragraph
 describing the next steps you might take in analyzing this dataset. What
 questions might you be able to answer, and what analyses would you
 conduct to answer those questions?
+
+\emph{Phosphorous and nitrogen concentrations vary by lake; the
+difference is especially pronounced in 1997 between East Long Lake, West
+Long Lake, Peter LAke, versus Paul Lake and Tuesday Lake. East Long Lake
+consistently has higher concentrations compared to the other lakes over
+most of the years.}
+
+\begin{center}\rule{0.5\linewidth}{\linethickness}\end{center}
+
+\emph{To better undrstand the relationship, I would want to run a
+two-way ANOVA looking at year and lake, and run a post-hoc analysis to
+see which lakes/years are different.}
 
 \hypertarget{knit-your-pdf}{%
 \subsection{KNIT YOUR PDF}\label{knit-your-pdf}}
